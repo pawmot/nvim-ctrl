@@ -1,18 +1,21 @@
 use anyhow::Result;
-use lazy_static::lazy_static;
+use clap::Parser;
 use neovim_lib::{Neovim, NeovimApi, Session};
 use regex::Regex;
-use structopt::StructOpt;
+use std::sync::LazyLock;
 
-#[derive(StructOpt)]
-#[structopt(about = "Control nvim from the CLI!")]
+#[derive(Parser)]
+#[command(about = "Control nvim from the CLI!")]
 struct Control {
     /// run an arbitrary command
     cmd: String,
 }
 
+static NVIM_RPC_SOCKET_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^nvim.\d+.0$").unwrap());
+
 fn main() -> Result<()> {
-    let args = Control::from_args();
+    let args = Control::parse();
     let xdg_runtime_dir = std::env::var("XDG_RUNTIME_DIR");
 
     let dirs = match xdg_runtime_dir {
@@ -36,11 +39,6 @@ fn main() -> Result<()> {
             }
         }
     };
-
-    lazy_static! {
-        static ref NVIM_RPC_SOCKET_RE: Regex =
-            Regex::new(r"^nvim.\d+.0$").unwrap();
-    }
 
     dirs.into_iter()
         .map(std::fs::read_dir)

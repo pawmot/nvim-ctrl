@@ -8,7 +8,9 @@ edition = "2018"
 
 [dependencies]
 neovim-lib = "0.6.1"
-anyhow = "1.0.28"
-structopt = "0.3.12"
-regex = "1.7.1"
-lazy_static = "1.4.0"
+# neovim-lib pulls in rmpv 0.4, which imports rmp::decode::read_data_* helpers
+# that rmp removed in 0.8.15. Cap rmp until neovim-lib moves off rmpv 0.4.
+rmp = "<=0.8.14"
+anyhow = "1.0.104"
+clap = { version = "4.6.6", features = ["derive"] }
+regex = "1.13.1"
